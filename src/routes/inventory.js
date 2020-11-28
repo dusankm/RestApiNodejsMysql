@@ -6,29 +6,36 @@ const mysqlConnection = require('../database');
 router.get('/inventory', (req,res) =>{
     mysqlConnection.query('SELECT * FROM inventory', (err, rows, fields) => {
         if(!err){
-            res.json(rows);
+            res.json({status:'OK', rsp:'Inventario Guardado', payload:rows});
         }else{
             console.log('Error', err)
         }
     });
 });
 
-router.get('/add-inventory', (req,res) =>{
+router.post('/add-inventory', (req,res) =>{
     const{id, name, stock}= req.body;
     const query=`
-        SET @id =?;
-        SET @name =?;
-        SET @stock =?;
-
-        CALL inventoryAddEdit(@id, @name, @stock);
+        CALL inventoryAddEdit(?,?,?);
     `;
-    mysqlConnection.query(query,[id,name,salary],(err, rows, fields) => {
-        if(!err){
-            res.json({Stutus:'OK', RSP:'Inventario Guardado'});
-        }else{
-            console.log('Error', err)
+    if(req.body.id==null || req.body.name==null || req.body.stock==null){
+        res.json({status:'201', rsp:'Parametros faltantes'});
+    }else{
+        try {
+            mysqlConnection.query(query,[id,name,stock],(err, rows, fields) => {
+                if(!err){
+                    res.json({status:'200', rsp:'Inventario Guardado'});
+                }else{
+                    res.json({status:'201', rsp:'Lo sentimos intente mas tarde'});
+                    console.log('Error', err)
+                }
+            });
+        } catch (e) {
+            console.error('catch questions: ', e);
+            res.json({status:'500', rsp:e});
         }
-    });
+    }
+
 });
 
 module.exports=router;
