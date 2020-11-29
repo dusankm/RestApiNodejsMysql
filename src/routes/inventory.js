@@ -38,4 +38,19 @@ router.post('/add-inventory', (req,res) =>{
 
 });
 
+router.put('/update/:id', (req,res) =>{
+    const {name,stock} = req.body;
+    const {id} = req.params;
+    const query= 'CALL inventoryAddEdit(?, ?,?)';
+    mysqlConnection.query(query,[id,name,stock], (err, rows, fields)=>{
+        if(!err){
+            res.json({status:'200', rsp:'Producto actualizado'});
+        }else{
+            res.json({status:'201', rsp:'Lo sentimos intente mas tarde'});
+            console.log('Error', err)
+        }
+    });
+
+});
+
 module.exports=router;
